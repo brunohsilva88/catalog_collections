@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import ItemCard from "../components/ItemCard";
+import { useLang } from "../context/LangContext";
 import { get, del } from "../api";
 
 export default function Collection() {
+  const { t } = useLang();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
@@ -20,7 +22,7 @@ export default function Collection() {
   useEffect(() => { load(); }, []);
 
   async function handleDelete(id) {
-    if (!confirm("Remover item da coleção?")) return;
+    if (!confirm(t.collection.confirmRemove)) return;
     await del(`/collection/${id}`);
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
@@ -36,26 +38,28 @@ export default function Collection() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">
-          Minha Coleção
-          <span className="ml-2 text-lg font-normal text-gray-400">({items.length})</span>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          {t.collection.title}
+          <span className="ml-2 text-lg font-normal text-gray-400 dark:text-gray-500">
+            ({items.length})
+          </span>
         </h2>
         <input
           type="text"
-          placeholder="Filtrar..."
+          placeholder={t.collection.filter}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
       </div>
 
       {loading ? (
-        <div className="text-center py-16 text-gray-400">Carregando...</div>
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">{t.collection.loading}</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-5xl mb-3">📦</p>
-          <p className="text-gray-500">
-            {filter ? "Nenhum item encontrado." : "Sua coleção está vazia. Adicione o primeiro item!"}
+          <p className="text-gray-500 dark:text-gray-400">
+            {filter ? t.collection.emptyFilter : t.collection.empty}
           </p>
         </div>
       ) : (

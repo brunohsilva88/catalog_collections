@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import ItemCard from "../components/ItemCard";
+import { useLang } from "../context/LangContext";
 import { get } from "../api";
 
 export default function Missing() {
+  const { t } = useLang();
   const [items, setItems] = useState([]);
   const [series, setSeries] = useState([]);
   const [selectedSeries, setSelectedSeries] = useState("");
@@ -14,46 +16,44 @@ export default function Missing() {
 
   useEffect(() => {
     setLoading(true);
-    const path = selectedSeries ? `/missing?series=${encodeURIComponent(selectedSeries)}` : "/missing";
-    get(path)
-      .then(setItems)
-      .finally(() => setLoading(false));
+    const path = selectedSeries
+      ? `/missing?series=${encodeURIComponent(selectedSeries)}`
+      : "/missing";
+    get(path).then(setItems).finally(() => setLoading(false));
   }, [selectedSeries]);
 
   return (
     <div>
       <div className="flex items-center gap-4 mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">
-          Faltando
-          <span className="ml-2 text-lg font-normal text-gray-400">({items.length})</span>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          {t.missing.title}
+          <span className="ml-2 text-lg font-normal text-gray-400 dark:text-gray-500">
+            ({items.length})
+          </span>
         </h2>
         <select
           value={selectedSeries}
           onChange={(e) => setSelectedSeries(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
         >
-          <option value="">Todas as séries</option>
-          {series.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
+          <option value="">{t.missing.allSeries}</option>
+          {series.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
       {series.length === 0 && !loading && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-sm text-yellow-800">
-          💡 Adicione itens ao catálogo de referência para ver o que está faltando na sua coleção.
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl p-4 mb-6 text-sm text-yellow-800 dark:text-yellow-300">
+          💡 {t.missing.tip}
         </div>
       )}
 
       {loading ? (
-        <div className="text-center py-16 text-gray-400">Carregando...</div>
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">{t.missing.loading}</div>
       ) : items.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-5xl mb-3">🎉</p>
-          <p className="text-gray-500">
-            {selectedSeries
-              ? `Você tem todos os itens da série "${selectedSeries}"!`
-              : "Nada faltando — catálogo vazio ou coleção completa!"}
+          <p className="text-gray-500 dark:text-gray-400">
+            {selectedSeries ? t.missing.emptySeries(selectedSeries) : t.missing.emptyAll}
           </p>
         </div>
       ) : (
